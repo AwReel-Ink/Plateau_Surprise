@@ -1,4 +1,4 @@
-const CACHE_NAME = 'plateau-surprise- Version : 8.0.0';
+const CACHE_NAME = 'plateau-surprise- Version : 8.0.1';
 const urlsToCache = [
   '/',
   '/index.html'
@@ -34,3 +34,4 @@ self.addEventListener('fetch', event => {
       .then(response => response || fetch(event.request))
   );
 });
+
