@@ -2,7 +2,7 @@
   "name": "Plateau Surprise",
   "short_name": "Plateau Surprise",
   "description": "Sélecteur aléatoire de jeux de société",
-  "start_url": "/",
+  "start_url": "/Plateau_Surprise/",
   "display": "standalone",
   "background_color": "#1a1a2e",
   "theme_color": "#FFD700",
@@ -22,3 +22,4 @@
     }
   ]
 }
+
