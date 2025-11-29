@@ -1,0 +1,1739 @@
+<!DOCTYPE html>
+<html lang="fr">
+     <!-- Copyright © 2025 - Leroy Aurélien - Tous droits réservés -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plateau Surprise</title>
+	<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&display=swap" rel="stylesheet">
+
+    <!-- PWA Manifest -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#FFD700">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Plateau Surprise">
+<link rel="apple-touch-icon" href="icon-192.png">
+
+
+    <style>
+/* Écran de chargement */
+#loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    opacity: 1;
+    transition: opacity 0.8s ease;
+    overflow: hidden;
+}
+
+#loading-screen.fade-out {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.loading-content {
+    position: relative;
+    text-align: center;
+    color: white;
+}
+
+.loading-content h1 {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 48px;
+    margin-bottom: 30px;
+    color: #FFD700;
+    text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+    position: relative;
+    overflow: hidden;
+}
+
+.loading-content h1::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+    animation: shine 2s infinite;
+}
+
+@keyframes shine {
+    0% { left: -100%; }
+    50%, 100% { left: 100%; }
+}
+
+.loading-content h1 span {
+    display: inline-block;
+    opacity: 0;
+    animation: letterAppear 0.1s forwards;
+}
+
+@keyframes letterAppear {
+    to { opacity: 1; }
+}
+
+/* Particules magiques */
+.magic-particles {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px;
+    height: 400px;
+    pointer-events: none;
+}
+
+.particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: radial-gradient(circle, #FFD700, transparent);
+    border-radius: 50%;
+    opacity: 0;
+    animation: particleFloat 3s ease-in-out infinite;
+}
+
+@keyframes particleFloat {
+    0% {
+        transform: translate(0, 0) scale(0);
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--x), var(--y)) scale(1);
+        opacity: 0;
+    }
+}
+
+/* Style des titres */
+h1, h2 {
+    font-family: 'Cinzel Decorative', serif;
+}
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Page d'accueil */
+        #home-page {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            gap: 20px;
+        }
+
+        .main-button {
+            width: 80%;
+            max-width: 400px;
+            padding: 25px;
+            font-size: 24px;
+            font-weight: bold;
+            border: none;
+            border-radius: 15px;
+            background: white;
+            color: #667eea;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .main-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+        }
+
+        .settings-button {
+            background: rgba(255, 255, 255, 0.9);
+            color: #667eea;
+        }
+
+        /* Header commun */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            margin-bottom: 20px;
+        }
+
+        .back-button, .search-button {
+            background: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .back-button:hover, .search-button:hover {
+            background: #f0f0f0;
+        }
+
+        /* Page Paramètres */
+        #settings-page {
+            display: none;
+        }
+
+        .settings-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .settings-content h1 {
+            color: #667eea;
+            margin-bottom: 30px;
+            font-size: 32px;
+            text-align: center;
+        }
+
+        .settings-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .settings-info p {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .game-counter {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 10px;
+            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .settings-section {
+            margin: 30px 0;
+        }
+
+        .settings-section h2 {
+            color: #667eea;
+            font-size: 22px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .import-export-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .settings-button-action {
+            padding: 18px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .settings-button-action:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        }
+
+        .export-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .import-button {
+            background: linear-gradient(135deg, #48c6ef 0%, #6f86d6 100%);
+            color: white;
+        }
+
+        .settings-button-action .icon {
+            font-size: 32px;
+        }
+
+        .settings-button-action .label {
+            font-size: 16px;
+        }
+
+        input[type="file"].hidden-file-input {
+            display: none;
+        }
+
+        .info-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .info-box p {
+            color: #856404;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .creator-info {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 30px;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+        }
+
+        .creator-info p {
+            color: #667eea;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        /* Page Jeu Aléatoire */
+        #random-page {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: hidden;
+        }
+
+        .random-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .random-content {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            margin-top: 10px;
+            min-height: 0;
+        }
+
+        .filters {
+            margin-bottom: 15px;
+            flex-shrink: 0;
+        }
+
+        .filter-group {
+            margin-bottom: 10px;
+        }
+
+        .filter-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #667eea;
+            font-size: 14px;
+        }
+
+        .filter-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .random-button {
+            width: 100%;
+            padding: 15px;
+            font-size: 20px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            margin-bottom: 15px;
+            transition: transform 0.2s;
+            flex-shrink: 0;
+        }
+
+        .random-button:hover {
+            transform: scale(1.05);
+        }
+
+        .game-result {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        .game-card {
+            text-align: center;
+            width: 100%;
+            max-width: 600px;
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            height: 100%;
+            gap: 15px;
+            padding: 10px;
+        }
+
+        .game-card h2 {
+            color: #667eea;
+            font-size: clamp(18px, 4vw, 28px);
+            word-wrap: break-word;
+            line-height: 1.2;
+            max-height: 3.6em;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .game-card-image {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        .game-card img {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            font-size: clamp(12px, 2.5vw, 16px);
+        }
+
+        .game-info span {
+            background: #f0f0f0;
+            padding: 6px 12px;
+            border-radius: 8px;
+            white-space: nowrap;
+        }
+
+        /* Page Liste des Jeux */
+        #list-page {
+            display: none;
+        }
+
+        .search-bar {
+            display: none;
+            margin-bottom: 20px;
+        }
+
+        .search-bar.active {
+            display: block;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            padding-bottom: 20px;
+        }
+
+        .game-item {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: transform 0.2s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .game-item:hover {
+            transform: scale(1.05);
+        }
+
+        .game-item h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 18px;
+            min-height: 40px;
+        }
+
+        .game-item img {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .game-item-info {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .game-item-info div {
+            margin: 5px 0;
+        }
+
+        /* Page Détails du Jeu */
+        #detail-page {
+            display: none;
+        }
+
+        .detail-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .detail-content h1 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 32px;
+        }
+
+        .detail-content img {
+            width: 100%;
+            max-height: 400px;
+            object-fit: contain;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .detail-info {
+            margin-bottom: 20px;
+        }
+
+        .detail-info div {
+            margin: 10px 0;
+            font-size: 18px;
+        }
+
+        .detail-description {
+            margin: 20px 0;
+            line-height: 1.6;
+            color: #666;
+        }
+
+        .edit-button, .delete-button {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            font-size: 18px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .edit-button {
+            background: #667eea;
+            color: white;
+        }
+
+        .delete-button {
+            background: #ff4757;
+            color: white;
+        }
+
+        /* Page Ajout de Jeu */
+        #add-page {
+            display: none;
+        }
+
+        .add-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #667eea;
+            font-size: 16px;
+        }
+
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .image-options {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .image-option-btn {
+            flex: 1;
+            min-width: 120px;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .image-option-btn:hover {
+            background: #5568d3;
+        }
+
+        .image-option-btn:active {
+            background: #4450b8;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .image-preview {
+            width: 100%;
+            max-height: 300px;
+            object-fit: contain;
+            border-radius: 10px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .image-preview.active {
+            display: block;
+        }
+
+        .save-button, .cancel-button {
+            width: 100%;
+            padding: 18px;
+            margin: 10px 0;
+            font-size: 20px;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .save-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .cancel-button {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .games-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .game-card h2 {
+                font-size: 20px;
+            }
+
+            .game-info {
+                font-size: 13px;
+                gap: 6px;
+            }
+
+            .game-info span {
+                padding: 5px 10px;
+            }
+
+            .detail-content h1 {
+                font-size: 24px;
+            }
+
+            .random-button {
+                font-size: 18px;
+                padding: 12px;
+            }
+
+            .import-export-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-button {
+                font-size: 20px;
+                padding: 20px;
+            }
+
+            .game-item h3 {
+                font-size: 16px;
+            }
+
+            .image-options {
+                flex-direction: column;
+            }
+
+            .image-option-btn {
+                width: 100%;
+            }
+
+            .game-info span {
+                font-size: 11px;
+                padding: 4px 8px;
+            }
+
+            .game-card {
+                gap: 10px;
+                padding: 5px;
+            }
+        }
+
+        /* Page d'édition */
+        #edit-page {
+            display: none;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: white;
+            font-size: 20px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+
+        .player-range {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .player-range input {
+            flex: 1;
+        }
+
+        .player-range span {
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        body > div:not(#home-page) {
+            min-height: auto;
+        }
+
+        .loading {
+            text-align: center;
+            color: #667eea;
+            font-size: 18px;
+            padding: 20px;
+        }
+
+        /* Modal de notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 20px 30px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            z-index: 10000;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        .notification.show {
+            display: block;
+        }
+
+        .notification.success {
+            border-left: 5px solid #28a745;
+        }
+
+        .notification.error {
+            border-left: 5px solid #dc3545;
+        }
+
+        .notification.info {
+            border-left: 5px solid #17a2b8;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- Écran de chargement -->
+<div id="loading-screen">
+    <div class="loading-content">
+        <div class="magic-particles" id="particles"></div>
+        <h1 id="magic-title"></h1>
+    </div>
+</div>
+
+    <!-- Notification Toast -->
+    <div id="notification" class="notification"></div>
+
+    <!-- Page d'accueil -->
+    <div id="home-page">
+        <h1 style="color: white; font-size: 36px; margin-bottom: 30px; text-align: center;">🎲 Plateau Surprise 🎲</h1>
+        <button class="main-button" onclick="showPage('random-page')">🎲 Jeu Aléatoire</button>
+        <button class="main-button" onclick="showPage('list-page')">📚 Liste des Jeux</button>
+        <button class="main-button" onclick="showPage('add-page')">➕ Ajouter un Nouveau Jeu</button>
+        <button class="main-button settings-button" onclick="showPage('settings-page')">⚙️ Paramètres</button>
+    </div>
+
+    <!-- Page Paramètres -->
+    <div id="settings-page">
+        <div class="container">
+            <div class="page-header">
+                <button class="back-button" onclick="showPage('home-page')">← Retour</button>
+            </div>
+            <div class="settings-content">
+                <h1>⚙️ Paramètres</h1>
+                
+                <!-- Créateur -->
+                <div class="creator-info">
+                    <p>✨ Application créée par LEROY Aurélien ✨ </p>
+					<small>Version 8.0.0 </small>
+                    <p><small>Copyright © 2025 - Leroy Aurélien - Tous droits réservés</small></p>
+                </div>
+
+                <!-- Compteur de jeux -->
+                <div class="settings-info">
+                    <p>📊 Nombre de jeux dans votre collection :</p>
+                    <div class="game-counter" id="game-counter">0 jeu(x)</div>
+                </div>
+
+                <!-- Import/Export -->
+                <div class="settings-section">
+                    <h2>🔄 Partager votre collection</h2>
+                    <div class="import-export-buttons">
+                        <button class="settings-button-action export-button" onclick="exportGames()">
+                            <span class="icon">📤</span>
+                            <span class="label">Exporter la liste</span>
+                        </button>
+                        <button class="settings-button-action import-button" onclick="document.getElementById('import-file').click()">
+                            <span class="icon">📥</span>
+                            <span class="label">Importer une liste</span>
+                        </button>
+                    </div>
+                    <input type="file" id="import-file" class="hidden-file-input" accept=".json" onchange="importGames(event)">
+                    
+                    <div class="info-box">
+                        <p><strong>💡 Comment ça marche ?</strong></p>
+                        <p>• <strong>Exporter :</strong> Créez un fichier contenant tous vos jeux pour le partager.</p>
+                        <p>• <strong>Importer :</strong> Chargez un fichier reçu pour récupérer ou fusionner une collection de jeux.</p>
+                        <p>• <strong>Compteur :</strong> Comparez le nombre de jeux pour savoir qui a la version la plus à jour !</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page Jeu Aléatoire -->
+    <div id="random-page">
+        <div class="random-container">
+            <div class="page-header">
+                <button class="back-button" onclick="showPage('home-page')">← Retour</button>
+            </div>
+            <div class="random-content">
+                <div class="filters">
+                    <div class="filter-group">
+                        <label>Nombre de joueurs</label>
+                        <select id="player-filter">
+                            <option value="all">Tous</option>
+                            <option value="1">1 joueur</option>
+                            <option value="2">2 joueurs</option>
+                            <option value="3">3 joueurs</option>
+                            <option value="4">4 joueurs</option>
+                            <option value="5">5 joueurs</option>
+                            <option value="6">6+ joueurs</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="random-button" onclick="pickRandomGame()">🎲 Choisir le jeu !</button>
+                <div class="game-result" id="random-result">
+                    <p style="color: #999; font-size: 18px;">Cliquez sur le bouton pour choisir un jeu aléatoire</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page Liste des Jeux -->
+    <div id="list-page">
+        <div class="container">
+            <div class="page-header">
+                <button class="back-button" onclick="showPage('home-page')">← Retour</button>
+                <button class="search-button" onclick="toggleSearch()">🔍</button>
+            </div>
+            <div class="search-bar" id="search-bar">
+                <input type="text" id="search-input" placeholder="Rechercher un jeu..." oninput="filterGames()">
+            </div>
+            <div class="games-grid" id="games-grid"></div>
+        </div>
+    </div>
+
+    <!-- Page Détails du Jeu -->
+    <div id="detail-page">
+        <div class="container">
+            <div class="page-header">
+                <button class="back-button" onclick="showPage('list-page')">← Retour</button>
+            </div>
+            <div class="detail-content" id="detail-content"></div>
+        </div>
+    </div>
+
+    <!-- Page Ajout/Édition de Jeu -->
+    <div id="add-page">
+        <div class="container">
+            <div class="page-header">
+                <button class="back-button" onclick="showPage('home-page')">← Retour</button>
+            </div>
+            <div class="add-content">
+                <h2 style="color: #667eea; margin-bottom: 30px; font-size: 28px;" id="form-title">➕ Ajouter un Nouveau Jeu</h2>
+                <form id="game-form" onsubmit="saveGame(event)">
+                    <div class="form-group">
+                        <label>Nom du jeu *</label>
+                        <input type="text" id="game-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Image du jeu</label>
+                        <div class="image-options">
+                            <button type="button" class="image-option-btn" onclick="document.getElementById('camera-input').click()">📷 Appareil Photo</button>
+                            <button type="button" class="image-option-btn" onclick="document.getElementById('gallery-input').click()">🖼️ Galerie</button>
+                            <button type="button" class="image-option-btn" onclick="toggleUrlInput()">🔗 URL</button>
+                        </div>
+                        <input type="file" id="camera-input" accept="image/*" capture="environment" onchange="handleImageUpload(event)">
+                        <input type="file" id="gallery-input" accept="image/*" onchange="handleImageUpload(event)">
+                        <input type="url" id="game-image" placeholder="https://..." oninput="previewImageUrl()" style="display: none;">
+                        <img id="image-preview" class="image-preview" alt="Aperçu">
+                        <input type="hidden" id="game-image-data">
+                    </div>
+                    <div class="form-group">
+                        <label>Nombre de joueurs (min - max)</label>
+                        <div class="player-range">
+                            <input type="number" id="game-players-min" min="1" placeholder="Min" value="1">
+                            <span>-</span>
+                            <input type="number" id="game-players-max" min="1" placeholder="Max" value="4">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Durée de la partie (minutes)</label>
+                        <input type="number" id="game-duration" min="1" placeholder="30">
+                    </div>
+                    <div class="form-group">
+                        <label>Note sur 10</label>
+                        <input type="number" id="game-rating" min="0" max="10" step="0.1" placeholder="7.5">
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="game-description" placeholder="Description du jeu..."></textarea>
+                    </div>
+                    <button type="submit" class="save-button">💾 Enregistrer</button>
+                    <button type="button" class="cancel-button" onclick="cancelForm()">❌ Annuler</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page Édition -->
+    <div id="edit-page">
+        <div class="container">
+            <div class="page-header">
+                <button class="back-button" onclick="showPage('detail-page')">← Retour</button>
+            </div>
+            <div class="add-content">
+                <h2 style="color: #667eea; margin-bottom: 30px; font-size: 28px;">✏️ Modifier le Jeu</h2>
+                <form id="edit-form" onsubmit="updateGame(event)">
+                    <div class="form-group">
+                        <label>Nom du jeu *</label>
+                        <input type="text" id="edit-game-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Image du jeu</label>
+                        <div class="image-options">
+                            <button type="button" class="image-option-btn" onclick="document.getElementById('edit-camera-input').click()">📷 Appareil Photo</button>
+                            <button type="button" class="image-option-btn" onclick="document.getElementById('edit-gallery-input').click()">🖼️ Galerie</button>
+                            <button type="button" class="image-option-btn" onclick="toggleEditUrlInput()">🔗 URL</button>
+                        </div>
+                        <input type="file" id="edit-camera-input" accept="image/*" capture="environment" onchange="handleEditImageUpload(event)">
+                        <input type="file" id="edit-gallery-input" accept="image/*" onchange="handleEditImageUpload(event)">
+                        <input type="url" id="edit-game-image" placeholder="https://..." oninput="previewEditImageUrl()" style="display: none;">
+                        <img id="edit-image-preview" class="image-preview" alt="Aperçu">
+                        <input type="hidden" id="edit-game-image-data">
+                    </div>
+                    <div class="form-group">
+                        <label>Nombre de joueurs (min - max)</label>
+                        <div class="player-range">
+                            <input type="number" id="edit-game-players-min" min="1" placeholder="Min">
+                            <span>-</span>
+                            <input type="number" id="edit-game-players-max" min="1" placeholder="Max">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Durée de la partie (minutes)</label>
+                        <input type="number" id="edit-game-duration" min="1" placeholder="30">
+                    </div>
+                    <div class="form-group">
+                        <label>Note sur 10</label>
+                        <input type="number" id="edit-game-rating" min="0" max="10" step="0.1" placeholder="7.5">
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="edit-game-description" placeholder="Description du jeu..."></textarea>
+                    </div>
+                    <button type="submit" class="save-button">💾 Enregistrer les modifications</button>
+                    <button type="button" class="cancel-button" onclick="showPage('detail-page')">❌ Annuler</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // VARIABLES GLOBALES
+        // ============================================
+        let games = [];
+        let db;
+        let editingGameId = null;
+        let currentGameId = null;
+
+        // ============================================
+        // GESTION IndexedDB
+        // ============================================
+
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open('GameSelectorDB', 1);
+                
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => {
+                    db = request.result;
+                    resolve(db);
+                };
+
+                request.onupgradeneeded = (event) => {
+                    db = event.target.result;
+                    if (!db.objectStoreNames.contains('games')) {
+                        const objectStore = db.createObjectStore('games', { keyPath: 'id' });
+                        objectStore.createIndex('name', 'name', { unique: false });
+                    }
+                };
+            });
+        }
+
+        function saveGamesToDB() {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction(['games'], 'readwrite');
+                const objectStore = transaction.objectStore('games');
+                
+                objectStore.clear();
+                
+                games.forEach(game => {
+                    objectStore.add(game);
+                });
+                
+                transaction.oncomplete = () => resolve();
+                transaction.onerror = () => reject(transaction.error);
+            });
+        }
+
+        function loadGamesFromDB() {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction(['games'], 'readonly');
+                const objectStore = transaction.objectStore('games');
+                const request = objectStore.getAll();
+                
+                request.onsuccess = () => {
+                    games = request.result;
+                    if (games.length === 0) {
+                        games = [
+                            {
+                                id: 1,
+                                name: "Catan",
+                                image: "https://images.unsplash.com/photo-1610890716171-6b1bb98ffd09?w=400",
+                                playersMin: 3,
+                                playersMax: 4,
+                                duration: 90,
+                                rating: 8.5,
+                                description: "Un jeu de placement et de gestion de ressources où vous devez construire et développer votre colonie sur l'île de Catan."
+                            },
+                            {
+                                id: 2,
+                                name: "7 Wonders",
+                                image: "https://images.unsplash.com/photo-1606167668584-78701c57f13d?w=400",
+                                playersMin: 2,
+                                playersMax: 7,
+                                duration: 30,
+                                rating: 8.0,
+                                description: "Développez votre civilisation en construisant une merveille et en gérant vos ressources sur trois âges."
+                            },
+                            {
+                                id: 3,
+                                name: "Azul",
+                                image: "https://images.unsplash.com/photo-1606503153255-59d3b6d6d12f?w=400",
+                                playersMin: 2,
+                                playersMax: 4,
+                                duration: 45,
+                                rating: 9.0,
+                                description: "Un jeu de placement de tuiles où vous devez décorer les murs du palais royal avec des azulejos."
+                            }
+                        ];
+                        saveGamesToDB().then(resolve);
+                    } else {
+                        resolve();
+                    }
+                };
+                
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        async function saveGames() {
+            try {
+                await saveGamesToDB();
+                updateGameCounter();
+            } catch (error) {
+                console.error('Erreur de sauvegarde:', error);
+                showNotification('⚠️ Erreur lors de la sauvegarde des données', 'error');
+            }
+        }
+
+        async function loadGames() {
+            try {
+                await initDB();
+                await loadGamesFromDB();
+                updateGameCounter();
+            } catch (error) {
+                console.error('Erreur de chargement:', error);
+                showNotification('⚠️ Erreur lors du chargement des données', 'error');
+            }
+        }
+
+        // ============================================
+        // FONCTIONS IMPORT/EXPORT
+        // ============================================
+
+        function exportGames() {
+            if (games.length === 0) {
+                showNotification('⚠️ Aucun jeu à exporter !', 'error');
+                return;
+            }
+
+            const dataStr = JSON.stringify({
+                exportDate: new Date().toISOString(),
+                gameCount: games.length,
+                games: games
+            }, null, 2);
+            
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `collection-jeux-${games.length}-jeux-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            showNotification(`✅ ${games.length} jeu(x) exporté(s) avec succès !`, 'success');
+        }
+
+        async function importGames(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    
+                    if (!importedData.games || !Array.isArray(importedData.games)) {
+                        throw new Error('Format de fichier invalide');
+                    }
+
+                    const importCount = importedData.gameCount || importedData.games.length;
+                    const currentCount = games.length;
+
+                    // Demander confirmation
+                    const action = await confirmImport(importCount, currentCount);
+                    
+                    if (action === 'cancel') {
+                        event.target.value = '';
+                        return;
+                    }
+
+                    if (action === 'merge') {
+                        // Fusion : ajouter les jeux qui n'existent pas déjà
+                        let addedCount = 0;
+                        importedData.games.forEach(importedGame => {
+                            const exists = games.some(g => g.name.toLowerCase() === importedGame.name.toLowerCase());
+                            if (!exists) {
+                                games.push({
+                                    ...importedGame,
+                                    id: Date.now() + Math.random()
+                                });
+                                addedCount++;
+                            }
+                        });
+                        await saveGames();
+                        showNotification(`✅ ${addedCount} nouveau(x) jeu(x) ajouté(s) ! Total : ${games.length}`, 'success');
+                    } else {
+                        // Remplacement complet
+                        games = importedData.games.map(game => ({
+                            ...game,
+                            id: game.id || Date.now() + Math.random()
+                        }));
+                        await saveGames();
+                        showNotification(`✅ Collection remplacée : ${games.length} jeu(x) importé(s) !`, 'success');
+                    }
+
+                    updateGameCounter();
+                    
+                } catch (error) {
+                    console.error('Erreur d\'importation:', error);
+                    showNotification('❌ Erreur : fichier invalide ou corrompu', 'error');
+                }
+                
+                event.target.value = '';
+            };
+            
+            reader.readAsText(file);
+        }
+
+        function confirmImport(importCount, currentCount) {
+            return new Promise((resolve) => {
+                const message = `📊 Votre collection : ${currentCount} jeu(x)\n📥 Fichier importé : ${importCount} jeu(x)\n\nQue souhaitez-vous faire ?`;
+                
+                const userChoice = confirm(
+                    message + '\n\n' +
+                    'OK = Fusionner (ajouter les nouveaux jeux)\n' +
+                    'Annuler = Choisir une autre option'
+                );
+
+                if (userChoice) {
+                    resolve('merge');
+                } else {
+                    const replaceChoice = confirm(
+                        'Voulez-vous REMPLACER complètement votre collection ?\n\n' +
+                        '⚠️ ATTENTION : Votre collection actuelle sera supprimée !\n\n' +
+                        'OK = Remplacer\n' +
+                        'Annuler = Ne rien faire'
+                    );
+                    resolve(replaceChoice ? 'replace' : 'cancel');
+                }
+            });
+        }
+
+        function updateGameCounter() {
+            const counter = document.getElementById('game-counter');
+            if (counter) {
+                counter.textContent = `${games.length} jeu(x)`;
+            }
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification show ${type}`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 4000);
+        }
+
+        // ============================================
+        // FONCTIONS D'AFFICHAGE ET NAVIGATION
+        // ============================================
+
+        function showPage(pageId) {
+            document.querySelectorAll('body > div:not(#notification)').forEach(page => {
+                page.style.display = 'none';
+            });
+            
+            const targetPage = document.getElementById(pageId);
+            if (pageId === 'home-page') {
+                targetPage.style.display = 'flex';
+            } else {
+                targetPage.style.display = 'block';
+            }
+
+            window.scrollTo(0, 0);
+
+            if (pageId === 'list-page') {
+                displayGames();
+            } else if (pageId === 'add-page') {
+                resetAddForm();
+            } else if (pageId === 'settings-page') {
+                updateGameCounter();
+            } else if (pageId === 'home-page') {
+                document.getElementById('search-bar').classList.remove('active');
+                document.getElementById('search-input').value = '';
+            }
+        }
+
+        function resetAddForm() {
+            document.getElementById('form-title').textContent = '➕ Ajouter un Nouveau Jeu';
+            document.getElementById('game-form').reset();
+            document.getElementById('image-preview').classList.remove('active');
+            document.getElementById('game-image').style.display = 'none';
+            document.getElementById('game-image-data').value = '';
+            editingGameId = null;
+        }
+
+        function toggleUrlInput() {
+            const urlInput = document.getElementById('game-image');
+            if (urlInput.style.display === 'none') {
+                urlInput.style.display = 'block';
+                urlInput.focus();
+            } else {
+                urlInput.style.display = 'none';
+            }
+        }
+
+        function toggleEditUrlInput() {
+            const urlInput = document.getElementById('edit-game-image');
+            if (urlInput.style.display === 'none') {
+                urlInput.style.display = 'block';
+                urlInput.focus();
+            } else {
+                urlInput.style.display = 'none';
+            }
+        }
+
+        // ============================================
+        // GESTION DES IMAGES
+        // ============================================
+
+        function resizeImage(file, callback) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+                    const maxSize = 800;
+
+                    if (width > height) {
+                        if (width > maxSize) {
+                            height = height * (maxSize / width);
+                            width = maxSize;
+                        }
+                    } else {
+                        if (height > maxSize) {
+                            width = width * (maxSize / height);
+                            height = maxSize;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    const resizedImage = canvas.toDataURL('image/jpeg', 0.75);
+                    callback(resizedImage);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                resizeImage(file, function(resizedImage) {
+                    document.getElementById('game-image-data').value = resizedImage;
+                    document.getElementById('image-preview').src = resizedImage;
+                    document.getElementById('image-preview').classList.add('active');
+                    document.getElementById('game-image').style.display = 'none';
+                });
+            }
+        }
+
+        function handleEditImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                resizeImage(file, function(resizedImage) {
+                    document.getElementById('edit-game-image-data').value = resizedImage;
+                    document.getElementById('edit-image-preview').src = resizedImage;
+                    document.getElementById('edit-image-preview').classList.add('active');
+                    document.getElementById('edit-game-image').style.display = 'none';
+                });
+            }
+        }
+
+        function previewImageUrl() {
+            const url = document.getElementById('game-image').value;
+            const preview = document.getElementById('image-preview');
+            if (url) {
+                preview.src = url;
+                preview.classList.add('active');
+                document.getElementById('game-image-data').value = url;
+            } else {
+                preview.classList.remove('active');
+                document.getElementById('game-image-data').value = '';
+            }
+        }
+
+        function previewEditImageUrl() {
+            const url = document.getElementById('edit-game-image').value;
+            const preview = document.getElementById('edit-image-preview');
+            if (url) {
+                preview.src = url;
+                preview.classList.add('active');
+                document.getElementById('edit-game-image-data').value = url;
+            } else {
+                preview.classList.remove('active');
+                document.getElementById('edit-game-image-data').value = '';
+            }
+        }
+
+        // ============================================
+        // GESTION DES JEUX
+        // ============================================
+
+        function displayGames(filteredGames = null) {
+            const grid = document.getElementById('games-grid');
+            const gamesToDisplay = filteredGames || games;
+            
+            if (gamesToDisplay.length === 0) {
+                grid.innerHTML = '<div class="no-results">Aucun jeu trouvé</div>';
+                return;
+            }
+
+            grid.innerHTML = gamesToDisplay.map(game => `
+                <div class="game-item" onclick="showGameDetail(${game.id})">
+                    <h3>${game.name}</h3>
+                    <img src="${game.image || 'https://via.placeholder.com/300x300?text=Pas+d\'image'}" alt="${game.name}" onerror="this.src='https://via.placeholder.com/300x300?text=Image+introuvable'">
+                    <div class="game-item-info">
+                        <div>👥 ${game.playersMin}${game.playersMax && game.playersMax !== game.playersMin ? '-' + game.playersMax : ''} joueur(s)</div>
+                        <div>⏱️ ${game.duration || '?'} min</div>
+                        <div>⭐ ${game.rating || 'Non noté'}/10</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function showGameDetail(gameId) {
+            currentGameId = gameId;
+            const game = games.find(g => g.id === gameId);
+            if (!game) return;
+
+            const content = document.getElementById('detail-content');
+            content.innerHTML = `
+                <h1>${game.name}</h1>
+                <img src="${game.image || 'https://via.placeholder.com/600x400?text=Pas+d\'image'}" alt="${game.name}" onerror="this.src='https://via.placeholder.com/600x400?text=Image+introuvable'">
+                <div class="detail-info">
+                    <div><strong>👥 Nombre de joueurs:</strong> ${game.playersMin}${game.playersMax && game.playersMax !== game.playersMin ? '-' + game.playersMax : ''}</div>
+                    <div><strong>⏱️ Durée:</strong> ${game.duration || 'Non spécifiée'} minutes</div>
+                    <div><strong>⭐ Note:</strong> ${game.rating || 'Non noté'}/10</div>
+                </div>
+                <div class="detail-description">
+                    <strong>Description:</strong><br>
+                    ${game.description || 'Aucune description disponible.'}
+                </div>
+                <button class="edit-button" onclick="editGame(${game.id})">✏️ Modifier</button>
+                <button class="delete-button" onclick="deleteGame(${game.id})">🗑️ Supprimer</button>
+            `;
+
+            showPage('detail-page');
+        }
+
+        function editGame(gameId) {
+            const game = games.find(g => g.id === gameId);
+            if (!game) return;
+
+            editingGameId = gameId;
+            
+            document.getElementById('edit-game-name').value = game.name;
+            document.getElementById('edit-game-players-min').value = game.playersMin || 1;
+            document.getElementById('edit-game-players-max').value = game.playersMax || game.playersMin || 1;
+            document.getElementById('edit-game-duration').value = game.duration || '';
+            document.getElementById('edit-game-rating').value = game.rating || '';
+            document.getElementById('edit-game-description').value = game.description || '';
+            document.getElementById('edit-game-image-data').value = game.image || '';
+            document.getElementById('edit-game-image').value = '';
+            document.getElementById('edit-game-image').style.display = 'none';
+
+            if (game.image) {
+                document.getElementById('edit-image-preview').src = game.image;
+                document.getElementById('edit-image-preview').classList.add('active');
+            } else {
+                document.getElementById('edit-image-preview').classList.remove('active');
+            }
+
+            showPage('edit-page');
+        }
+
+        async function updateGame(event) {
+            event.preventDefault();
+
+            const gameIndex = games.findIndex(g => g.id === editingGameId);
+            if (gameIndex === -1) return;
+
+            games[gameIndex] = {
+                ...games[gameIndex],
+                name: document.getElementById('edit-game-name').value,
+                image: document.getElementById('edit-game-image-data').value,
+                playersMin: parseInt(document.getElementById('edit-game-players-min').value) || 1,
+                playersMax: parseInt(document.getElementById('edit-game-players-max').value) || 1,
+                duration: parseInt(document.getElementById('edit-game-duration').value) || null,
+                rating: parseFloat(document.getElementById('edit-game-rating').value) || null,
+                description: document.getElementById('edit-game-description').value
+            };
+
+            await saveGames();
+            showGameDetail(editingGameId);
+            editingGameId = null;
+            showNotification('✅ Jeu modifié avec succès !', 'success');
+        }
+
+        async function deleteGame(gameId) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer ce jeu ?')) {
+                games = games.filter(g => g.id !== gameId);
+                await saveGames();
+                showPage('list-page');
+                showNotification('🗑️ Jeu supprimé', 'info');
+            }
+        }
+
+        async function saveGame(event) {
+            event.preventDefault();
+
+            const newGame = {
+                id: Date.now(),
+                name: document.getElementById('game-name').value,
+                image: document.getElementById('game-image-data').value,
+                playersMin: parseInt(document.getElementById('game-players-min').value) || 1,
+                playersMax: parseInt(document.getElementById('game-players-max').value) || 1,
+                duration: parseInt(document.getElementById('game-duration').value) || null,
+                rating: parseFloat(document.getElementById('game-rating').value) || null,
+                description: document.getElementById('game-description').value
+            };
+
+            games.push(newGame);
+            await saveGames();
+            showPage('list-page');
+            showNotification('✅ Jeu ajouté avec succès !', 'success');
+        }
+
+        function cancelForm() {
+            showPage('home-page');
+        }
+
+        function toggleSearch() {
+            const searchBar = document.getElementById('search-bar');
+            searchBar.classList.toggle('active');
+            if (searchBar.classList.contains('active')) {
+                document.getElementById('search-input').focus();
+            } else {
+                document.getElementById('search-input').value = '';
+                displayGames();
+            }
+        }
+
+        function filterGames() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const filtered = games.filter(game => 
+                game.name.toLowerCase().includes(query)
+            );
+            displayGames(filtered);
+        }
+
+        function pickRandomGame() {
+            const playerFilter = document.getElementById('player-filter').value;
+            
+            let filteredGames = games;
+            
+            if (playerFilter !== 'all') {
+                const numPlayers = parseInt(playerFilter);
+                filteredGames = games.filter(game => {
+                    const min = game.playersMin || 1;
+                    const max = game.playersMax || game.playersMin || 1;
+                    return numPlayers >= min && numPlayers <= max;
+                });
+            }
+
+            const resultDiv = document.getElementById('random-result');
+
+            if (filteredGames.length === 0) {
+                resultDiv.innerHTML = '<p style="color: #ff4757; font-size: 20px;">❌ Aucun jeu ne correspond aux critères</p>';
+                return;
+            }
+
+            const randomGame = filteredGames[Math.floor(Math.random() * filteredGames.length)];
+
+            resultDiv.innerHTML = `
+                <div class="game-card">
+                    <h2>${randomGame.name}</h2>
+                    <div class="game-card-image">
+                        <img src="${randomGame.image || 'https://via.placeholder.com/400x400?text=Pas+d\'image'}" alt="${randomGame.name}" onerror="this.src='https://via.placeholder.com/400x400?text=Image+introuvable'">
+                    </div>
+                    <div class="game-info">
+                        <span>👥 ${randomGame.playersMin}${randomGame.playersMax && randomGame.playersMax !== randomGame.playersMin ? '-' + randomGame.playersMax : ''}</span>
+                        <span>⏱️ ${randomGame.duration || '?'} min</span>
+                        <span>⭐ ${randomGame.rating || 'N/A'}/10</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Initialisation
+// Animation de chargement
+window.addEventListener('load', () => {
+    // Animation du titre lettre par lettre
+    const title = "Plateau\u00A0Surprise"; // \u00A0 = espace insécable
+    const titleElement = document.getElementById('magic-title');
+    
+    title.split('').forEach((char, index) => {
+        const span = document.createElement('span');
+        span.textContent = char;
+        span.style.animationDelay = `${index * 0.04}s`; // 0.04s * 25 lettres ≈ 1s
+        titleElement.appendChild(span);
+    });
+
+    // Création des particules magiques
+    const particlesContainer = document.getElementById('particles');
+    for (let i = 0; i < 30; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        
+        const angle = (Math.PI * 2 * i) / 30;
+        const distance = 150 + Math.random() * 100;
+        const x = Math.cos(angle) * distance;
+        const y = Math.sin(angle) * distance;
+        
+        particle.style.setProperty('--x', `${x}px`);
+        particle.style.setProperty('--y', `${y}px`);
+        particle.style.animationDelay = `${Math.random() * 1}s`; // Particules plus rapides
+        
+        particlesContainer.appendChild(particle);
+    }
+
+    // Fade out après 1500ms
+    setTimeout(() => {
+        document.getElementById('loading-screen').classList.add('fade-out');
+    }, 1500);
+});
+
+loadGames();
+    </script>
+    <script>
+// Enregistrement du Service Worker
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+            .then(reg => console.log('✅ Service Worker enregistré'))
+            .catch(err => console.log('❌ Erreur Service Worker:', err));
+    });
+}
+</script>
+
+</body>
+</html>
