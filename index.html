@@ -443,6 +443,7 @@ h1, h2 {
             overflow: hidden;
             display: -webkit-box;
             -webkit-line-clamp: 2;
+            line-clamp: 2;
             -webkit-box-orient: vertical;
         }
 
@@ -646,6 +647,57 @@ h1, h2 {
         .form-group textarea {
             min-height: 100px;
             resize: vertical;
+        }
+
+                /* Zone de texte pour les règles */
+        #game-rules, #edit-game-rules {
+            min-height: 200px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+        }
+
+        .game-rules {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            border-left: 4px solid #667eea;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .game-rules h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+
+        .game-rules pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: inherit;
+            line-height: 1.6;
+            color: white;
+            margin: 0;
+        }
+
+        /* Scrollbar personnalisée pour les règles */
+        .game-rules::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .game-rules::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+        }
+
+        .game-rules::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 10px;
+        }
+
+        .game-rules::-webkit-scrollbar-thumb:hover {
+            background: #764ba2;
         }
 
         .image-options {
@@ -897,7 +949,7 @@ h1, h2 {
                 <!-- Créateur -->
                 <div class="creator-info">
                     <p>✨ Application créée par LEROY Aurélien ✨ </p>
-					<small>Version 8.0.5 </small>
+					<small>Version 9.0.0 </small>
                     <p><small>Copyright © 2025 - Leroy Aurélien - Tous droits réservés</small></p>
                 </div>
 
@@ -1032,6 +1084,13 @@ h1, h2 {
                         <label>Description</label>
                         <textarea id="game-description" placeholder="Description du jeu..."></textarea>
                     </div>
+                    <div class="form-group">
+                        <label>Règles du jeu (optionnel)</label>
+                        <textarea id="game-rules" placeholder="Collez ici les règles du jeu (copiées depuis un PDF par exemple)..." rows="10"></textarea>
+                        <small style="color: #999; display: block; margin-top: 5px;">
+                            💡 Vous pouvez copier-coller les règles depuis un PDF ou les saisir manuellement
+                        </small>
+                    </div>
                     <button type="submit" class="save-button">💾 Enregistrer</button>
                     <button type="button" class="cancel-button" onclick="cancelForm()">❌ Annuler</button>
                 </form>
@@ -1084,6 +1143,13 @@ h1, h2 {
                     <div class="form-group">
                         <label>Description</label>
                         <textarea id="edit-game-description" placeholder="Description du jeu..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Règles du jeu (optionnel)</label>
+                        <textarea id="edit-game-rules" placeholder="Collez ici les règles du jeu..." rows="10"></textarea>
+                        <small style="color: #999; display: block; margin-top: 5px;">
+                            💡 Vous pouvez copier-coller les règles depuis un PDF
+                        </small>
                     </div>
                     <button type="submit" class="save-button">💾 Enregistrer les modifications</button>
                     <button type="button" class="cancel-button" onclick="showPage('detail-page')">❌ Annuler</button>
@@ -1159,7 +1225,8 @@ h1, h2 {
                                 playersMax: 4,
                                 duration: 90,
                                 rating: 8.5,
-                                description: "Un jeu de placement et de gestion de ressources où vous devez construire et développer votre colonie sur l'île de Catan."
+                                description: "Un jeu de placement et de gestion de ressources où vous devez construire et développer votre colonie sur l'île de Catan.",
+                                rules: null
                             },
                             {
                                 id: 2,
@@ -1169,7 +1236,8 @@ h1, h2 {
                                 playersMax: 7,
                                 duration: 30,
                                 rating: 8.0,
-                                description: "Développez votre civilisation en construisant une merveille et en gérant vos ressources sur trois âges."
+                                description: "Développez votre civilisation en construisant une merveille et en gérant vos ressources sur trois âges.",
+                                rules: null
                             },
                             {
                                 id: 3,
@@ -1179,7 +1247,8 @@ h1, h2 {
                                 playersMax: 4,
                                 duration: 45,
                                 rating: 9.0,
-                                description: "Un jeu de placement de tuiles où vous devez décorer les murs du palais royal avec des azulejos."
+                                description: "Un jeu de placement de tuiles où vous devez décorer les murs du palais royal avec des azulejos.",
+                                rules: null 
                             }
                         ];
                         saveGamesToDB().then(resolve);
@@ -1538,9 +1607,17 @@ h1, h2 {
                     <strong>Description:</strong><br>
                     ${game.description || 'Aucune description disponible.'}
                 </div>
-                <button class="edit-button" onclick="editGame(${game.id})">✏️ Modifier</button>
-                <button class="delete-button" onclick="deleteGame(${game.id})">🗑️ Supprimer</button>
-            `;
+                ${game.rules ? `
+                <div class="game-rules" style="margin-top: 30px; padding: 20px; background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%); border-radius: 15px; border-left: 4px solid #667eea; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                    <h3 style="color: #FFD700; margin-bottom: 5px; font-size: 22px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 6px 12px; border-radius: 30px; display: inline-block; box-shadow: 0 6px 15px rgba(102, 126, 234, 0.5); text-shadow: 1px 1px 3px rgba(0,0,0,0.3);">📜 Règles du jeu</h3>
+                    <pre style="white-space: pre-wrap; word-wrap: break-word; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.8; color: #3B3B3B;">${game.rules}</pre>
+                </div>
+                ` : ''}
+                <div class="button-group" style="margin-top: 30px;">
+                    <button class="edit-button" onclick="editGame(${game.id})">✏️ Modifier</button>
+                    <button class="delete-button" onclick="confirmDelete(${game.id})">🗑️ Supprimer</button>
+                </div>
+    `;
 
             showPage('detail-page');
         }
@@ -1560,6 +1637,7 @@ h1, h2 {
             document.getElementById('edit-game-image-data').value = game.image || '';
             document.getElementById('edit-game-image').value = '';
             document.getElementById('edit-game-image').style.display = 'none';
+            document.getElementById('edit-game-rules').value = game.rules || '';
 
             if (game.image) {
                 document.getElementById('edit-image-preview').src = game.image;
@@ -1585,7 +1663,8 @@ h1, h2 {
                 playersMax: parseInt(document.getElementById('edit-game-players-max').value) || 1,
                 duration: parseInt(document.getElementById('edit-game-duration').value) || null,
                 rating: parseFloat(document.getElementById('edit-game-rating').value) || null,
-                description: document.getElementById('edit-game-description').value
+                description: document.getElementById('edit-game-description').value,
+                rules: document.getElementById('edit-game-rules').value || null
             };
 
             await saveGames();
@@ -1614,7 +1693,8 @@ h1, h2 {
                 playersMax: parseInt(document.getElementById('game-players-max').value) || 1,
                 duration: parseInt(document.getElementById('game-duration').value) || null,
                 rating: parseFloat(document.getElementById('game-rating').value) || null,
-                description: document.getElementById('game-description').value
+                description: document.getElementById('game-description').value,
+                rules: document.getElementById('game-rules').value || null //
             };
 
             games.push(newGame);
@@ -1737,8 +1817,3 @@ if ('serviceWorker' in navigator) {
 
 </body>
 </html>
-
-
-
-
-
