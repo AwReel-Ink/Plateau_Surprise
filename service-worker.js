@@ -1,4 +1,4 @@
-const CACHE_NAME = 'plateau-surprise-v8.0.5'; // ✅ Incrémente la version
+const CACHE_NAME = 'plateau-surprise-v9.0.0'; // ✅ Incrémente la version
 const urlsToCache = [
   './',
   './index.html',
