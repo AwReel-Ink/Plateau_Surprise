@@ -949,7 +949,7 @@ h1, h2 {
                 <!-- Créateur -->
                 <div class="creator-info">
                     <p>✨ Application créée par LEROY Aurélien ✨ </p>
-					<small>Version 9.0.0 </small>
+					<small>Version 9.0.1 </small>
                     <p><small>Copyright © 2025 - Leroy Aurélien - Tous droits réservés</small></p>
                 </div>
 
@@ -1579,7 +1579,7 @@ h1, h2 {
             grid.innerHTML = gamesToDisplay.map(game => `
                 <div class="game-item" onclick="showGameDetail(${game.id})">
                     <h3>${game.name}</h3>
-                    <img src="${game.image || 'https://via.placeholder.com/300x300?text=Pas+d\'image'}" alt="${game.name}" onerror="this.src='https://via.placeholder.com/300x300?text=Image+introuvable'">
+                    <img src="${game.image || 'https://placehold.co/300x300/667eea/white?text=Pas+d\'image'}" alt="${game.name}" onerror="if(!this.dataset.failed){this.dataset.failed='1';this.src='https://placehold.co/300x300/667eea/white?text=Erreur'}else{this.style.display='none'}">
                     <div class="game-item-info">
                         <div>👥 ${game.playersMin}${game.playersMax && game.playersMax !== game.playersMin ? '-' + game.playersMax : ''} joueur(s)</div>
                         <div>⏱️ ${game.duration || '?'} min</div>
@@ -1597,7 +1597,7 @@ h1, h2 {
             const content = document.getElementById('detail-content');
             content.innerHTML = `
                 <h1>${game.name}</h1>
-                <img src="${game.image || 'https://via.placeholder.com/600x400?text=Pas+d\'image'}" alt="${game.name}" onerror="this.src='https://via.placeholder.com/600x400?text=Image+introuvable'">
+                <img src="${game.image || 'https://placehold.co/600x400/667eea/white?text=Pas+d\'image'}" alt="${game.name}" onerror="if(!this.dataset.failed){this.dataset.failed='1';this.src='https://placehold.co/600x400/667eea/white?text=Erreur'}else{this.style.display='none'}">
                 <div class="detail-info">
                     <div><strong>👥 Nombre de joueurs:</strong> ${game.playersMin}${game.playersMax && game.playersMax !== game.playersMin ? '-' + game.playersMax : ''}</div>
                     <div><strong>⏱️ Durée:</strong> ${game.duration || 'Non spécifiée'} minutes</div>
@@ -1673,12 +1673,23 @@ h1, h2 {
             showNotification('✅ Jeu modifié avec succès !', 'success');
         }
 
+        // 🗑️ Supprimer un jeu (SANS confirmation interne)
         async function deleteGame(gameId) {
-            if (confirm('Êtes-vous sûr de vouloir supprimer ce jeu ?')) {
-                games = games.filter(g => g.id !== gameId);
-                await saveGames();
-                showPage('list-page');
-                showNotification('🗑️ Jeu supprimé', 'info');
+            games = games.filter(g => g.id !== gameId);
+            await saveGames();
+            showPage('list-page');
+            showNotification('🗑️ Jeu supprimé', 'info');
+        }
+
+        // ⚠️ Confirmation avant suppression
+        function confirmDelete(id) {
+            const game = games.find(g => g.id === id);
+            if (game) {
+                if (confirm(`❌ Voulez-vous vraiment supprimer "${game.name}" ?\n\nCette action est irréversible !`)) {
+                    deleteGame(id);
+                }
+            } else {
+                showNotification('⚠️ Jeu introuvable', 'error');
             }
         }
 
@@ -1753,7 +1764,7 @@ h1, h2 {
                 <div class="game-card">
                     <h2>${randomGame.name}</h2>
                     <div class="game-card-image">
-                        <img src="${randomGame.image || 'https://via.placeholder.com/400x400?text=Pas+d\'image'}" alt="${randomGame.name}" onerror="this.src='https://via.placeholder.com/400x400?text=Image+introuvable'">
+                        <img src="${randomGame.image || 'https://placehold.co/400x400/667eea/white?text=Pas+d\'image'}" alt="${randomGame.name}" onerror="if(!this.dataset.failed){this.dataset.failed='1';this.src='https://placehold.co/400x400/667eea/white?text=Erreur'}else{this.style.display='none'}">
                     </div>
                     <div class="game-info">
                         <span>👥 ${randomGame.playersMin}${randomGame.playersMax && randomGame.playersMax !== randomGame.playersMin ? '-' + randomGame.playersMax : ''}</span>
